@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const People = require('../models/people');
 const Food = require("../models/food");
-const Users = require('../models/users')
+const Users = require('../models/users');
 router.get("/", async(req, res)=>{
     
     try{
