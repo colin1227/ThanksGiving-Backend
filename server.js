@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: 'https://modest-shannon-5dde5e.netlify.com/' || 'http://localhost:3000',
   optionsSuccessStatus: 200,
   credentials: true
 };
