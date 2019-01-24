@@ -9,14 +9,13 @@ router.post("/", async(req, res)=>{
     try{
         const user = await Users.findById(req.body.userId)
         res.json({
-                'status': 200,
-               'logged': true,
-                'userId': user._id,
-                'firstName': user.firstName,
-                'likedFood': user.likedFood,
-                'thanks': user.thanks
-
-            })
+            'status': 200,
+            'logged': true,
+            'userId': user._id,
+            'firstName': user.firstName,
+            'likedFood': user.likedFood,
+            'thanks': user.thanks
+        })
     }
     catch(err){
         res.json({
@@ -27,7 +26,20 @@ router.post("/", async(req, res)=>{
     }
 })
 router.get("/", async(req, res)=>{
-    
+  try{
+      console.log("200")
+      res.json({
+          status: 200,
+          data: "testing testing, 123."
+      })
+  } 
+  catch(err){
+      console.log(err)
+      res.json({
+        status: 200,
+        data: "nope"
+    })
+  }  
 })
 
 router.post("/login", async(req, res)=>{
@@ -41,13 +53,14 @@ router.post("/login", async(req, res)=>{
                    'data': 'login sucessful',
                    'logged': true,
                    'userId': foundUser._id,
-                   'username': foundUser.username,
+                   'firstName': foundUser.firstName,
                    'super': foundUser.super
                 })
             }
         }
         else{
             res.json({
+                'logged': false,
                 'data': 'login unsucessful'
             })
         }
@@ -55,6 +68,7 @@ router.post("/login", async(req, res)=>{
     }
     catch(err){
         res.json({
+            'status': 500,
             'data': 'error'
         })
     }
@@ -143,24 +157,16 @@ router.post("/register", async(req, res) => {
 
 router.put("/liked", async(req, res)=>{
     try{
-      const foodLiked = await Food.findOne({'name':req.body.food.name})
-      const user = await Users.findByIdAndUpdate(req.body.userId,
-         {$push:
+        const foodLiked = await Food.findOne({'name':req.body.food.name})
+        const user = await Users.findByIdAndUpdate(req.body.userId,
+            {$push:
             {likedFood: foodLiked}
-        }, {'new':true})
+            }, {'new':true})
     
-      if(user.likedFood === undefined){
-          res.json({
-              'data': "didn't work"
-          })
-      }
-      else{
-          res.json({
-              'data': 'worked'
-          })
-      }
+        res.json({
+            'data': 'worked'
+            })
       
-    //   console.log(user, "worked")
     }
     catch(err){
         console.log(err)
