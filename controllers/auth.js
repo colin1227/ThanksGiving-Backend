@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 
 const Users = require('../models/users');
 const Food = require("../models/food");
+//const Kids = require('../models/kids');
 router.post("/", async(req, res)=>{
     try{
         const user = await Users.findById(req.body.userId)
@@ -11,7 +12,7 @@ router.post("/", async(req, res)=>{
                 'status': 200,
                'logged': true,
                 'userId': user._id,
-                'username': user.username,
+                'firstName': user.firstName,
                 'likedFood': user.likedFood,
                 'thanks': user.thanks
 
@@ -19,7 +20,7 @@ router.post("/", async(req, res)=>{
     }
     catch(err){
         res.json({
-            'status':400,
+            'status':500,
             'data': 'error',
             'err': err
         })
@@ -68,19 +69,34 @@ router.post("/register", async(req, res) => {
         const encryptedPassword = await bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10));
         if(admin){
             const user = await Users.create({
-            username: req.body.username,
-            password: encryptedPassword,
-            food: req.body.food,
-            super: true
+                username: req.body.username,
+                password: encryptedPassword,
+    
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+    
+                canDrink: req.body.canDrink,
+    
+                foodBrought: req.body.foodBrought,
+                familyCode: req.body.familyCode,
+    
+                spouse: req.body.spouse,
+                spouseFirst: req.body.spouseFirst,
+                spouseLast: req.body.spouseLast,
+    
+                kids:req.body.kids,
+                
+                super: true
         })
-               res.json({
+        console.log(user.kids)
+        //await Kids.remove({firstName: user.firstName, lastName: user.lastName});
+        
+
+        res.json({
             'logged': true,
             'user': {
-                'username': user.username,
-                'likedFood': user.likedFood,
-                'thanks': user.thanks,
+                'firstName': user.firstName,
                 'super': user.super
-                
             },
             'userId': user._id
         })
@@ -89,17 +105,28 @@ router.post("/register", async(req, res) => {
         const user = await Users.create({
             username: req.body.username,
             password: encryptedPassword,
-            food: req.body.food,
+
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+
+            canDrink: req.body.canDrink,
+
+            foodBrought: req.body.foodBrought,
+            familyCode: req.body.familyCode,
+
+            spouse: req.body.spouse,
+            spouseFirst: req.body.spouseFirst,
+            spouseLast: req.body.spouseLast,
+
+            kids:req.body.kids,
+
             super: false
         })
-               res.json({
+        res.json({
             'logged': true,
             'user': {
-                'username': user.username,
-                'likedFood': user.likedFood,
-                'thanks': user.thanks,
+                'firstName': user.firstName,
                 'super': user.super
-                
             },
             'userId': user._id
         })
@@ -124,7 +151,7 @@ router.put("/liked", async(req, res)=>{
     
       if(user.likedFood === undefined){
           res.json({
-              'data': 'didn\'t work'
+              'data': "didn't work"
           })
       }
       else{

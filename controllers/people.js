@@ -3,6 +3,7 @@ const router = express.Router();
 const People = require('../models/people');
 const Food = require("../models/food");
 const Users = require('../models/users');
+
 router.get("/", async(req, res)=>{
     
     try{
@@ -13,8 +14,8 @@ router.get("/", async(req, res)=>{
                 ...arrayToSend,
                 {_id: element._id,
                 name: element.username,
-                 thanks: element.thanks,
-                 foods: element.likedFood}]
+                thanks: element.thanks,
+                foods: element.likedFood}]
         })
         const everyone = await People.find();
         res.json({
