@@ -19,8 +19,8 @@ const userSchema = new mongoose.Schema({
     spouse: Boolean,
     spouseFirst: String,
     spouseLast: String,
-    parents: [String],
-    siblings: [String],
+    parents: [Object],
+    siblings: [Object],
     kids:[Kids.schema],
     kidsIds: [String],
 

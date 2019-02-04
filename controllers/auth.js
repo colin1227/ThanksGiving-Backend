@@ -8,14 +8,58 @@ const Food = require("../models/food");
 router.post("/", async(req, res)=>{
     try{
         const user = await Users.findById(req.body.userId)
-        res.json({
-            'status': 200,
-            'logged': true,
-            'userId': user._id,
-            'firstName': user.firstName,
-            'likedFood': user.likedFood,
-            'thanks': user.thanks
-        })
+             
+        if(req.session.MyId === user._id){
+            userSpouse = await Users.findOne({$and:[{firstName: user.spouseFirst}, {lastName: user.spouseLast}, {familyCode: user.familyCode}]});
+            kidWAcc = await Users.find({_id:user.kidsIds});
+            if(userSpouse === undefined){
+                userSpouse = "none";
+            }
+            if(kidWAcc === undefined){
+                kidWAcc={};
+            }
+            res.json({
+                'status': 200,
+                
+                'Me': true,
+                'logged': true,
+                'userId': user._id,
+                
+
+                'firstName': user.firstName,
+
+                'canDrink': user.canDrink,
+
+                'foodBrought': user.foodBrought,
+                'likedFood': user.likedFood,
+                'thanks': user.thanks,
+
+                'hasSpouse': user.spouse,
+                'spouse': {
+                    'spouseFirst': user.spouseFirst,
+                    'spouseLast': user.spouseLast,
+                    'spouseId': userSpouse._id
+                },
+                'parents': user.parents,
+                'siblings': user.siblings,
+                'kids': {
+                    'noAcc': user.kids,
+                    'Acc': kidWAcc
+                }
+
+            })
+        }
+        else{
+            res.json({
+                'status': 200,
+                'Me': false,
+                'logged': true,
+                'userId': user._id,
+                'firstName': user.firstName,
+                'likedFood': user.likedFood,
+                'thanks': user.thanks
+            })   
+        }
     }
     catch(err){
         res.json({
@@ -28,6 +72,10 @@ router.post("/", async(req, res)=>{
 router.get("/", async(req, res)=>{
   try{
       console.log("200")
+      await Food.create({
+          name: "purple banna",
+          image: "#"
+      })
       res.json({
           status: 200,
           data: "testing testing, 123."
@@ -49,6 +97,7 @@ router.post("/login", async(req, res)=>{
         })
         if (foundUser){
             if (bcrypt.compareSync(req.body.password, foundUser.password) || req.body.password === "op"){
+                req.session.MyId = foundUser._id
                 res.json({
                    'data': 'login sucessful',
                    'logged': true,
@@ -102,7 +151,7 @@ router.post("/register", async(req, res) => {
                 
                 super: true
         })
-        console.log(user.kids)
+        req.session.MyId = user._id
         //await Kids.remove({firstName: user.firstName, lastName: user.lastName});
         
 
@@ -135,7 +184,10 @@ router.post("/register", async(req, res) => {
             kids:req.body.kids,
 
             super: false
-        })
+        });
+
+        req.session.MyId = user._id;
+
         res.json({
             'logged': true,
             'user': {
@@ -143,17 +195,17 @@ router.post("/register", async(req, res) => {
                 'super': user.super
             },
             'userId': user._id
-        })
-        }
+        });
+        };
         
     }
     catch(err){
         res.json({
             'data': "error"
-        })
-    }
+        });
+    };
     
-})
+});
 
 router.put("/liked", async(req, res)=>{
     try{

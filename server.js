@@ -16,9 +16,10 @@ app.use(session({
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+// origin: 'https://stupefied-goldstine-407450.netlify.com' || 'http://localhost:3000',
 
 const corsOptions = {
-  origin: 'https://stupefied-goldstine-407450.netlify.com' || 'http://localhost:3000',
+  origin: 'http://localhost:3000',
   optionsSuccessStatus: 200,
   credentials: true
 };
