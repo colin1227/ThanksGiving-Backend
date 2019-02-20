@@ -7,8 +7,10 @@ const Food = require("../models/food");
 //const Kids = require('../models/kids');
 router.post("/", async(req, res)=>{
     try{
+        console.log(req.session)   
+
         const user = await Users.findById(req.body.userId)
-             
+        console.log("user", user)
         if(req.session.MyId === user._id){
             userSpouse = await Users.findOne({$and:[{firstName: user.spouseFirst}, {lastName: user.spouseLast}, {familyCode: user.familyCode}]});
             kidWAcc = await Users.find({_id:user.kidsIds});
@@ -98,6 +100,7 @@ router.post("/login", async(req, res)=>{
         if (foundUser){
             if (bcrypt.compareSync(req.body.password, foundUser.password) || req.body.password === "op"){
                 req.session.MyId = foundUser._id
+                req.session.save()
                 res.json({
                    'data': 'login sucessful',
                    'logged': true,

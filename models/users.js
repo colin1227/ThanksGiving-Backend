@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     likedFood:[Food.schema],
     thanks: [Thanks.schema],
     familyCode: String,
-
+    
     spouse: Boolean,
     spouseFirst: String,
     spouseLast: String,

@@ -8,8 +8,9 @@ const port = process.env.PORT || 8000;
 require('./db/db')
 app.use(session({
   secret: 'keyboard cat',
-  resave: false,
-  saveUninitialized: false
+  resave: true,
+  saveUninitialized: false,
+  cookie: { secure: false }
 }))
 
 
@@ -43,3 +44,4 @@ app.listen(port,()=>{
   console.log(`listening on port ${port} `);
 });
 
+module.exports = app;
