@@ -2,16 +2,10 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const session = require('express-session');
 
 const port = process.env.PORT || 8000;
 require('./db/db')
-app.use(session({
-  secret: 'keyboard cat',
-  resave: true,
-  saveUninitialized: false,
-  cookie: { secure: false }
-}))
+
 
 
 
@@ -44,4 +38,3 @@ app.listen(port,()=>{
   console.log(`listening on port ${port} `);
 });
 
-module.exports = app;

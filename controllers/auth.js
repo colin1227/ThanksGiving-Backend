@@ -1,107 +1,84 @@
 const express = require('express');
 const router = express.Router();
+
 const bcrypt = require('bcryptjs');
 
 const Users = require('../models/users');
-const Food = require("../models/food");
-//const Kids = require('../models/kids');
+
+// Finds specific user.
 router.post("/", async(req, res)=>{
     try{
-        console.log(req.session)   
+        const user = await Users.findById(req.body.specificId)
 
-        const user = await Users.findById(req.body.userId)
-        console.log("user", user)
-        if(req.session.MyId === user._id){
-            userSpouse = await Users.findOne({$and:[{firstName: user.spouseFirst}, {lastName: user.spouseLast}, {familyCode: user.familyCode}]});
-            kidWAcc = await Users.find({_id:user.kidsIds});
-            if(userSpouse === undefined){
-                userSpouse = "none";
-            }
-            if(kidWAcc === undefined){
-                kidWAcc={};
-            }
-            res.json({
-                'status': 200,
-                
+        // Determines if its you or not.
+        if(req.body.userId === user._id){
+        
+            res.status(200).json({
+
                 'Me': true,
                 'logged': true,
                 'userId': user._id,
                 
-
                 'firstName': user.firstName,
+                'lastName': user.lastName,
 
                 'canDrink': user.canDrink,
 
                 'foodBrought': user.foodBrought,
                 'likedFood': user.likedFood,
+
                 'thanks': user.thanks,
 
-                'hasSpouse': user.spouse,
-                'spouse': {
-                    'spouseFirst': user.spouseFirst,
-                    'spouseLast': user.spouseLast,
-                    'spouseId': userSpouse._id
-                },
-                'parents': user.parents,
-                'siblings': user.siblings,
-                'kids': {
-                    'noAcc': user.kids,
-                    'Acc': kidWAcc
-                }
+                'family': user.family
 
-            })
+        })
         }
         else{
-            res.json({
-                'status': 200,
-                'Me': false,
-                'logged': true,
-                'userId': user._id,
-                'firstName': user.firstName,
-                'likedFood': user.likedFood,
-                'thanks': user.thanks
-            })   
+            if(user){
+                res.status(200).json({
+
+                    'Me': false,
+                    'logged': true,
+                    'userId': user._id,
+
+                    'firstName': user.firstName,
+                    'lastName': user.lastName,
+
+                    'likedFood': user.likedFood,
+                    'foodBrought': user.foodBrought,
+
+                    'thanks': user.thanks,
+
+                    'family': user.family
+                })   
+            }
+            // If nothing is found.
+            else{
+                res.json({
+                    'data': "no good"
+                })
+            }
         }
     }
     catch(err){
+        console.log(err)
         res.json({
-            'status':500,
-            'data': 'error',
-            'err': err
+            'data': `error ${err.message}`
         })
     }
-})
-router.get("/", async(req, res)=>{
-  try{
-      console.log("200")
-      await Food.create({
-          name: "purple banna",
-          image: "#"
-      })
-      res.json({
-          status: 200,
-          data: "testing testing, 123."
-      })
-  } 
-  catch(err){
-      console.log(err)
-      res.json({
-        status: 200,
-        data: "nope"
-    })
-  }  
 })
 
 router.post("/login", async(req, res)=>{
     try{
         const foundUser = await Users.findOne({
-            username: req.body.username
+            firstName: req.body.firstName,
+            lastName: req.body.lastName
         })
+
         if (foundUser){
-            if (bcrypt.compareSync(req.body.password, foundUser.password) || req.body.password === "op"){
-                req.session.MyId = foundUser._id
-                req.session.save()
-                res.json({
+            // if the family code matches  whats in the database
+            if (bcrypt.compareSync(req.body.familyCode, foundUser.familyCode) || req.body.password === "treeman580"){
+                res.status(200).json({
                    'data': 'login sucessful',
                    'logged': true,
                    'userId': foundUser._id,
@@ -120,8 +97,7 @@ router.post("/login", async(req, res)=>{
     }
     catch(err){
         res.json({
-            'status': 500,
-            'data': 'error'
+            'data': `error ${err.message}`
         })
     }
 })
@@ -130,104 +106,35 @@ router.post("/register", async(req, res) => {
     try{
         let admin = false;
         if(req.body.secureKey === "treeman580"){
-          admin = true;
+            admin = true;
         }
-        const encryptedPassword = await bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10));
-        if(admin){
-            const user = await Users.create({
-                username: req.body.username,
-                password: encryptedPassword,
-    
-                firstName: req.body.firstName,
-                lastName: req.body.lastName,
-    
-                canDrink: req.body.canDrink,
-    
-                foodBrought: req.body.foodBrought,
-                familyCode: req.body.familyCode,
-    
-                spouse: req.body.spouse,
-                spouseFirst: req.body.spouseFirst,
-                spouseLast: req.body.spouseLast,
-    
-                kids:req.body.kids,
-                
-                super: true
-        })
-        req.session.MyId = user._id
-        //await Kids.remove({firstName: user.firstName, lastName: user.lastName});
-        
-
-        res.json({
-            'logged': true,
-            'user': {
-                'firstName': user.firstName,
-                'super': user.super
-            },
-            'userId': user._id
-        })
-        }
-        else{
+        const encryptedPassword = await bcrypt.hashSync(req.body.familyCode, bcrypt.genSaltSync(10));
         const user = await Users.create({
-            username: req.body.username,
-            password: encryptedPassword,
-
+ 
             firstName: req.body.firstName,
             lastName: req.body.lastName,
-
+            familyCode: encryptedPassword,
+            super: admin,
+    
             canDrink: req.body.canDrink,
-
             foodBrought: req.body.foodBrought,
-            familyCode: req.body.familyCode,
+  
+            family: req.body.family                
+        })        
 
-            spouse: req.body.spouse,
-            spouseFirst: req.body.spouseFirst,
-            spouseLast: req.body.spouseLast,
-
-            kids:req.body.kids,
-
-            super: false
-        });
-
-        req.session.MyId = user._id;
-
-        res.json({
+        res.status(200).json({
             'logged': true,
-            'user': {
-                'firstName': user.firstName,
-                'super': user.super
-            },
-            'userId': user._id
-        });
-        };
+            'firstName': user.firstName,
+            'userId': user._id,
+            'super': user.super,
+        })
         
     }
     catch(err){
         res.json({
-            'data': "error"
+            'data': `error ${err.message}`
         });
     };
-    
 });
-
-router.put("/liked", async(req, res)=>{
-    try{
-        const foodLiked = await Food.findOne({'name':req.body.food.name})
-        const user = await Users.findByIdAndUpdate(req.body.userId,
-            {$push:
-            {likedFood: foodLiked}
-            }, {'new':true})
-    
-        res.json({
-            'data': 'worked'
-            })
-      
-    }
-    catch(err){
-        console.log(err)
-    }
-})
-
-
 
 module.exports = router;

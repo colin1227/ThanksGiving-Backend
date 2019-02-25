@@ -17,6 +17,44 @@ router.get('/', async(req, res)=>{
     }
 })
 
+router.get("/test", async(req, res)=>{
+    try{
+        await Food.create({
+            name: "purple banna",
+            image: "#"
+        })
+        res.json({
+            'status': 200,
+            'data': "testing testing, 123."
+        })
+    } 
+    catch(err){
+          res.json({
+              'status': 400,
+              'data': `error ${err.message}`
+      })
+    }  
+})
+
+router.put("/liked", async(req, res)=>{
+    try{
+        const foodLiked = await Food.findOne({'name':req.body.food.name})
+        await Users.findByIdAndUpdate(req.body.userId,{$push:
+            {likedFood: foodLiked}
+            }, 
+            {'new':true})
+        res.json({
+            'data': 'worked'
+            })
+      
+    }
+    catch(err){
+        res.json({
+            'data': `error ${err.message}`
+        });
+    };
+});
+
 router.post("/insert", async(req, res)=>{
     if(req.body.super === true){
         try{
